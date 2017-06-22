@@ -1,0 +1,175 @@
+/*From a clean install*/
+/*In this example, nc0030.int.nexylan.net is the server*/
+/*nc0031 and nc0032 is the client*/
+/**/
+/*****************/
+/***SERVER SIDE***/
+/*****************/
+-Icinga master (server side) need specific folders and files to work properly. This tree show how files are involved:
+--/etc/icinga2/--zones.conf
+              ./zones.d/-
+                       ./master/--hosts.conf
+                                --services.conf
+
+-Puppet master (server side) need 2 files in /etc/puppet/manifests/ : hosts.conf, services.conf.
+--/etc/puppet/
+             ./manifests/--nodes.pp
+                         --site.pp
+                         
+**ICINGA2**:
+------------
+-*zones.conf*:
+
+object Endpoint "nc0030.int.nexylan.net" {
+	host = "10.10.5.30"
+}
+
+object Zone "master" {
+	endpoints = [ "nc0030.int.nexylan.net" ]
+}
+
+object Endpoint "nc0031.int.nexylan.net" { 
+	host = "10.10.5.31"
+}
+
+object Zone "nc0031.int.nexylan.net" {
+        endpoints = ["nc0031.int.nexylan.net"]
+	parent = "master"
+}
+
+object Endpoint "nc0032.int.nexylan.net" {
+	host = "10.10.5.32"
+}
+
+object Zone "nc0032.int.nexylan.net" {
+        endpoints = ["nc0032.int.nexylan.net"]
+	parent = "master"
+}
+
+object Zone "global-templates" {
+	global = true
+}
+
+-*hosts.conf*:
+
+object Host "nc0031.int.nexylan.net" {
+	check_command = "hostalive"
+	address = "10.10.5.31"
+
+	vars.client_endpoint = name
+}
+
+object Host "nc0032.int.nexylan.net" {
+	check_command = "hostalive"
+	address = "10.10.5.32"
+	
+	vars.client_endpoint = name
+}
+
+-*services.conf*:
+
+apply Service "disk" {
+  check_command = "disk"
+
+  //specify where the check is executed
+  command_endpoint = host.vars.client_endpoint
+
+  assign where host.vars.client_endpoint
+}
+apply Service "load" {
+  import "generic-service"
+
+  check_command = "load"
+
+  /* Used by the ScheduledDowntime apply rule in `downtimes.conf`. */
+  vars.backup_downtime = "02:00-03:00"
+
+  command_endpoint = host.vars.client_endpoint
+
+  assign where host.vars.client_endpoint
+}
+
+apply Service "procs" {
+  import "generic-service"
+
+  check_command = "procs"
+
+  command_endpoint = host.vars.client_endpoint
+
+  assign where host.vars.client_endpoint
+}
+
+apply Service "swap" {
+  import "generic-service"
+
+  check_command = "swap"
+
+command_endpoint = host.vars.client_endpoint
+
+  assign where host.vars.client_endpoint
+}
+
+apply Service "users" {
+  import "generic-service"
+
+  check_command = "users"
+
+command_endpoint = host.vars.client_endpoint
+
+  assign where host.vars.client_endpoint
+}
+
+**PUPPET**:
+-----------
+
+-*nodes.pp*:
+
+node base {
+	include	apache
+	include	icinga2
+}
+
+/!\ same node for nc0031
+node 'nc0032.int.nexylan.net' inherits base {
+
+        class {'::icinga2::feature::api':
+                ensure          => 'present',
+                pki             => 'icinga2',
+                ca_host         => 'nc0030.int.nexylan.net',
+                accept_config   =>      true,
+                accept_commands =>      true,
+                endpoints       => {
+                        'NodeName'              => {},
+                        'nc0030.int.nexylan.net'=> {
+                                'host'  => 'nc0030.int.nexylan.net',
+                        },
+                },
+                zones           => {
+                        'master'        => {
+                                'endpoints'     => ['nc0030.int.nexylan.net'],
+                        },
+                        'ZoneName'      => {
+                                'endpoints'     => ['NodeName'],
+                                'parent'        => 'master',
+                        },
+                }
+        }
+        icinga2::object::zone {'global-templates':
+                global => true,
+        }
+}
+
+-*site.pp*:
+
+import "nodes.pp"
+
+$puppetserver="nc0030.int.nexylan.net"
+
+filebucket {"main":
+	server	=> puppet,
+	path	=> false,
+}
+
+/****************************/
+/***SERVER SIDE END CONFIG***/
+/****************************/
