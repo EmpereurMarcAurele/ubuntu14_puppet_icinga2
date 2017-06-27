@@ -17,5 +17,16 @@
       match => '^vars.server_$services_list[i]*$',
       }
     }
+    else {
+    file {'/etc/icinga2/zones.d/master/hosts.conf':
+      ensure => present
+      }->
+      file_line {'file line in hosts.conf':
+      path => '/etc/icinga2/zones.d/master/hosts.conf',
+      line => 'vars.server_$services_list[i] == false',
+      match => '^vars.server_$services_list[i]*$',
+      }
+    }
+    i++;
   }
 }
