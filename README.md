@@ -7,12 +7,12 @@ Here we use the "Top-down" models, witch necessit a conf only on server side.
 
 /*********/
 puppet - amp - icinga2
-/*********/
+/*********/                 
 -The file "master_config_icinga" provide an automatic connection between the server and the client: certificate are automaticly signed.        
 -The file "init_server.pp" is an early try to make a custom puppet module for an automatics installation of: puppet, amp and modules from puppet.                 
 -The files "nodes.pp" and "site.pp" are deprecated, don't use it.
 
 /*********/
 services icinga2 / nagios-plugin
-/*********/
+/*********/              
 -The file "custom_class.pp" the main class to add/remove services to monitor, depends witch services was already installed on your remote host.
