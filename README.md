@@ -1,5 +1,5 @@
 # ubuntu14_puppet_icinga2
-automatic install of puppet & amp / icinga 2 on ubuntu 14.04
+automatic install of puppet & amp / icinga 2 on ubuntu 14.04             
 automatic add/remove services of icinga2 / nagios-plugins
 
 There are 3 way to collect data on icinga2.
@@ -13,6 +13,7 @@ puppet - amp - icinga2
 -The files "nodes.pp" and "site.pp" are deprecated, don't use it.
 
 /*********/
-services icinga2 / nagios-plugin
+services icinga2 / nagios-plugin #### WORK IN PROGRESS
 /*********/              
 -The file "custom_class.pp" the main class to add/remove services to monitor, depends witch services was already installed on your remote host.
+On puppet agent execution, this class was executed on the remote host.
