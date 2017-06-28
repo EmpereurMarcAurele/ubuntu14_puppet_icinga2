@@ -1,7 +1,7 @@
- Myclass (host_name){
+ Myclass (host.name){
   include ::icinga2
  
-  $host_name = host_name
+  $host_name = host.name
   $services_list = ["mysql","php",]
   
   /*print name host eventually*/
