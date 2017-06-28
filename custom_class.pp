@@ -12,8 +12,8 @@
       }->
       file_line {'file line in hosts.conf':
       path => '/etc/icinga2/zones.d/master/hosts.conf',
-      line => "#\"$host_name\" vars.server_\"$services_list\" == true",
-      match => "^#\"$host_name\" vars.server_\"$services_list\"*$",
+      line => "#$host_name vars.server_$services_list == true",
+      match => "^#$host_name vars.server_$services_list*$",
       }
     }
     else {
