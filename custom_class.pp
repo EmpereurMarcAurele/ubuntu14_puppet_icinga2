@@ -12,8 +12,8 @@
       }->
       file_line {'file line in hosts.conf':
       path => '/etc/icinga2/zones.d/master/hosts.conf',
-      line => 'vars.server_$services_list == true',
-      match => '^vars.server_$services_list*$',
+      line => '#$host_name vars.server_$services_list == true',
+      match => '^#$host_name vars.server_$services_list*$',
       }
     }
     else {
@@ -22,9 +22,13 @@
       }->
       file_line {'file line in hosts.conf':
       path => '/etc/icinga2/zones.d/master/hosts.conf',
-      line => 'vars.server_$services_list == false',
-      match => '^vars.server_$services_list*$',
+      line => '#$host_name vars.server_$services_list == false',
+      match => '^#$host vars.server_$services_list*$',
       }
     }
   }
 }
+##summary description##
+/*
+*-need to add '#$host_name before 'vars.server_$services_list' for match exactly pattern on the good object host.
+*/
