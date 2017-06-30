@@ -10,7 +10,8 @@
               ./zones.d/-
                        ./master/--hosts.conf
                                 --services.conf
-
+	      ./conf.d/-
+	      	       --commands.conf
 -Puppet master (server side) need 2 files in /etc/puppet/manifests/ : hosts.conf, services.conf.
 --/etc/puppet/
              ./manifests/--nodes.pp
@@ -173,3 +174,73 @@ filebucket {"main":
 /****************************/
 /***SERVER SIDE END CONFIG***/
 /****************************/
+
+/*******************/
+/***ADD A SERVICE***/
+/*******************/
+
+**ICINGA**
+----------
+
+-*hosts.conf*:
+
+object Host "nc0031.int.nexylan.net" {
+	check_command = "hostalive"
+	address = "10.10.5.31"
+
+	vars.client_endpoint = name
+	#nc0031.int.nexylan.net
+	vars.server_mysql = true
+	#nc0031.int.nexylan.net
+	vars.server_http = false
+}
+
+object Host "nc0032.int.nexylan.net" {
+	import "generic-host"
+	check_command = "hostalive"
+	address = "10.10.5.32"
+	
+	vars.client_endpoint = name
+	#nc0032.int.nexylan.net
+	vars.server_mysql = false
+	#nc0032.int.nexylan.net
+	vars.server_http = false
+}
+
+-*services.conf*:
+
+apply Service "mysql" {
+	import "generic-service"
+
+	check_command = "chk_mysql"
+	vars.mysql_host = host.address
+	assign where host.vars.server_mysql == true
+}
+
+apply Service "http" {
+	import "generic-service"
+	
+	check_command = "chk_http"
+	vars.http_host = host.adress
+	assign where host.vars.server_http == true
+}
+
+-*commands.conf*:
+
+object CheckCommand "chk_mysql" {
+	import "plugin-check-command"
+	
+	command = [ PluginDir + "/check_mysql"]
+	arguments = {
+		"-H" = "$mysql_host$"
+	}
+}
+
+object CheckCommand "chk_http" {
+	import "plugin-check-command"
+	
+	command = [ PluginDir + "/check_mysql"]
+	argument = {
+		"-H" = "$http_host$"
+	}
+}
