@@ -158,6 +158,8 @@ node 'nc0032.int.nexylan.net' inherits base {
         icinga2::object::zone {'global-templates':
                 global => true,
         }
+	
+	include nexycinga
 }
 
 -*site.pp*:
