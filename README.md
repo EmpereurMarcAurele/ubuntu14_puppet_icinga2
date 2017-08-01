@@ -17,3 +17,7 @@ services icinga2 / nagios-plugin #### WORK IN PROGRESS
 /*********/              
 -The file "custom_class.pp" the main class to add/remove services to monitor, depends witch services was already installed on your remote host.
 On puppet agent execution, this class was executed on the remote host.
+                      
+
+/***sources***/
+http://hadooppowered.com/2014/05/12/setup-a-puppetmaster-with-puppetdb-and-puppetboard/
